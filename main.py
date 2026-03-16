@@ -89,18 +89,18 @@ def parse_args():
     ap.add_argument("--target_dist", type=float, default=1.0, help="Desired distance in front of the tag (m)")
 
     # --- Controller tuning ---
-    ap.add_argument("--hz", type=float, default=15.0, help="Main control loop rate (Hz)")
-    ap.add_argument("--k_dist", type=float, default=0.8)
+    ap.add_argument("--hz", type=float, default=30.0, help="Main control loop rate (Hz)")
+    ap.add_argument("--k_dist", type=float, default=1.4)
     ap.add_argument("--k_lat", type=float, default=1.0)
     ap.add_argument("--k_yaw", type=float, default=1.6)
 
-    ap.add_argument("--max_vx", type=float, default=0.45)
-    ap.add_argument("--max_vy", type=float, default=0.25)
+    ap.add_argument("--max_vx", type=float, default=0.55)
+    ap.add_argument("--max_vy", type=float, default=0.30)
     ap.add_argument("--max_vyaw", type=float, default=0.6)
 
-    ap.add_argument("--min_vyaw", type=float, default=0.22)
+    ap.add_argument("--min_vyaw", type=float, default=0.13)
     ap.add_argument("--min_vx_cmd", type=float, default=0.20)
-    ap.add_argument("--min_vy_cmd", type=float, default=0.10)
+    ap.add_argument("--min_vy_cmd", type=float, default=0.13)
 
     ap.add_argument("--yaw_first_deg", type=float, default=15.0, help="Rotate in place if |yaw_err| exceeds this")
     ap.add_argument("--tol_dist", type=float, default=0.03)
@@ -109,6 +109,8 @@ def parse_args():
 
     ap.add_argument("--min_cmd_dist_margin", type=float, default=0.0)
     ap.add_argument("--min_cmd_lat_margin", type=float, default=0.0)
+    ap.add_argument("--lat_vx_assist", type=float, default=0.0,
+                    help="Min vx applied as locomotion assist when lateral deadband fires (m/s)")
 
     # --- Fusion + dropout behavior ---
     ap.add_argument("--alpha_tag", type=float, default=0.25, help="EMA blend factor for T_odom_tag_est")
@@ -119,7 +121,8 @@ def parse_args():
     ap.add_argument("--dropout_yaw_scale", type=float, default=1.0, help="Scale vyaw during short losses")
     ap.add_argument("--search_vyaw", type=float, default=0.25, help="Yaw rate during SEARCH")
 
-    ap.add_argument("--allow_backward", action="store_true", help="Allow negative vx when too close")
+    ap.add_argument("--allow_backward", type=lambda x: x.lower() != "false", default=True,
+                    help="Allow negative vx when too close (default: True). Pass --allow_backward false to disable.")
     ap.add_argument("--max_meas_yaw_jump_deg", type=float, default=70.0)
     ap.add_argument("--max_meas_dist_jump", type=float, default=0.35)
 
@@ -199,6 +202,7 @@ def main():
         tol_dist=args.tol_dist, tol_lat=args.tol_lat, tol_yaw_deg=args.tol_yaw_deg,
         min_cmd_dist_margin=args.min_cmd_dist_margin,
         min_cmd_lat_margin=args.min_cmd_lat_margin,
+        lat_vx_assist=args.lat_vx_assist,
         short_loss_s=args.short_loss_s, long_loss_s=args.long_loss_s,
         dropout_scale=args.dropout_scale, dropout_yaw_scale=args.dropout_yaw_scale,
         search_vyaw=args.search_vyaw, allow_backward=args.allow_backward,
